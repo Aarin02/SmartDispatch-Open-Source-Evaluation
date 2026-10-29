@@ -1,11 +1,11 @@
-# SmartDispatch: Delivery Partner Assignment & ETA Engine
+# SmartDispatch — Zomato-Inspired Delivery Partner Assignment & ETA Engine
 
 **Individual 24-hour challenge | Python 3.10+ | Synthetic data only**
 
 ## Scenario
 A food-delivery service assigns orders to delivery partners. Partner availability, existing workload, restaurant preparation time and travel estimates affect the delivery ETA. Build the decision logic; do not build a mobile app, map UI or live GPS integration.
 
-This is a simulated challenge inspired by common logistics problems, not any company's internal code.
+This is a simulated challenge inspired by food-delivery dispatch and ETA problems associated with services such as Zomato. It is not Zomato's internal software, is not affiliated with Zomato, and uses only synthetic data.
 
 ## Required behaviour
 1. Validate order ID, restaurant ID, destination zone and non-negative preparation/travel times.
