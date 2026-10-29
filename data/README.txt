@@ -1,1 +1,1 @@
-Sample JSON records for ShuttleOps. Do not commit private passenger information or secrets.
+SmartDispatch dataset v2 (all records synthetic): records.json contains 180 orders, 60 partner records, 387 travel-time records, 177 cancellation events and 10 edge-case categories. Some travel-time routes are intentionally missing. Convert travel-time records to the tuple-key mapping expected by service.py. The main demo uses fixtures.py; records.json is the larger dataset for investigation and additional tests. No real delivery-partner or live location data.
