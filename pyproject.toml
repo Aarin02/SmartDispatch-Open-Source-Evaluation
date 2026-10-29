@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "shuttleops-evaluation-starter"
 version = "1.0.0"
-description = "Manage campus shuttle routes and passenger capacity"
+description = "Delivery partner eligibility, ETA calculation, capacity and cancellation handling"
 requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
