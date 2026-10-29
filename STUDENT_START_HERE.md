@@ -1,4 +1,4 @@
-# Student start here — SmartDispatch
+# Student start here — ShuttleOps
 
 This file is the reading checklist for this evaluation. Read the linked documents before editing code. You are responsible for understanding the starter code, data, tests and required submission files.
 
