@@ -19,6 +19,14 @@ This is a simulated challenge inspired by common logistics problems, not any com
 ## Setup
 Run: `python -m pip install -r requirements-dev.txt`, then `python -m pytest -q`, then `python -m main`.
 
+## Repository reading checklist and dataset
+
+Before editing, read `README.md` and `STUDENT_START_HERE.md`, then inspect the whole repository—not only this PDF. Read `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`, the test/template documents, `service.py`, `models.py`, `fixtures.py`, `main.py`, every file under `tests/`, and the workflow files under `.github/workflows/`.
+
+The expanded synthetic dataset is in `data/records.json`: **180 orders, 60 delivery-partner records, 387 travel-time records, and 177 cancellation events**, plus an edge-case catalog. Read `data/README.txt` for its schema. Some travel routes are deliberately missing; the dataset also covers full capacity, inactive partners, ETA boundary values, tie-breaking, duplicate cancellations and invalid inputs. Convert the JSON travel-time rows into the tuple-key mapping expected by `service.py`. The offline demo uses `fixtures.py`; the large JSON is additional investigation and test material.
+
+Run the baseline tests before editing and record their actual result. Do not delete, skip, weaken or bypass tests.
+
 ## Work to submit
 - Read the source and run the starter tests before editing.
 - Treat the required behaviour above as the acceptance contract. Investigate failing assertions, locate the root cause and fix the logic instead of hard-coding fixture results.
