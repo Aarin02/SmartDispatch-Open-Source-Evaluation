@@ -1,5 +1,7 @@
 # SmartDispatch — Delivery Partner Assignment & ETA Engine
 
+> **Central student guide:** [Read the complete Open-Source Evaluation Guide](https://github.com/sunitazenith07-lang/LabLedger-Open-Source-Evaluation/blob/main/OPEN_SOURCE_EVALUATION_STUDENT_GUIDE.md) — includes all four tracks, required reading, submission instructions, and the three compulsory documentation files.
+
 Zenith School of AI | Individual Open-Source Evaluation | Python 3.10+ | Synthetic challenge data only
 
 Logistics: partner eligibility, capacity, ETA calculation, tie-breaking and cancellation handling.
