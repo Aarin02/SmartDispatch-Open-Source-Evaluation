@@ -21,7 +21,6 @@ def estimate_eta(order, partner, travel, now=0):
     if not all(_is_non_empty_str(s) for s in (partner_id, zone, restaurant_id, destination_zone)):
         return {'partner_id': partner_id, 'eta_minutes': None, 'eligible': False}
 
-    # Requirement 2 & 5: Missing travel data is None (never defaulted to 0)
     leg1 = travel.get((zone, restaurant_id))
     leg2 = travel.get((restaurant_id, destination_zone))
     workload = partner.get('workload_minutes', 0)
@@ -67,7 +66,6 @@ def assign_order(order, partners, travel, now=0):
     for partner in (partners if isinstance(partners, list) else []):
         if not isinstance(partner, dict):
             continue
-        # Requirement 2: Only active partners below capacity
         if partner.get('active') is not True:
             continue
         capacity = partner.get('capacity', 0)
@@ -87,7 +85,6 @@ def assign_order(order, partners, travel, now=0):
         if estimate['eligible']:
             options.append(estimate)
 
-    # Requirement 5: Leave unassigned and explain why if no valid candidate remains
     if not options:
         return {
             'order_id': order_id,
@@ -96,7 +93,6 @@ def assign_order(order, partners, travel, now=0):
             'reason': 'no eligible partner or missing time data'
         }
 
-    # Requirement 4: Lowest ETA, tie-break by partner_id in ascending lexicographic order
     chosen = min(options, key=lambda item: (item['eta_minutes'], str(item['partner_id'])))
     return {
         'order_id': order_id,
@@ -111,8 +107,21 @@ def process_cancellation(partner, order_id, event_id):
     out = deepcopy(partner)
     out.setdefault('active_order_ids', [])
     out.setdefault('processed_cancellation_ids', [])
+
+    # Requirement 6: Process a cancellation event only once
+    if not _is_non_empty_str(event_id) or event_id in out['processed_cancellation_ids']:
+        return out
+
     if order_id in out['active_order_ids']:
         out['active_order_ids'].remove(order_id)
-        out['workload_minutes'] = max(0, out.get('workload_minutes', 0) - out.get('minutes_by_order', {}).get(order_id, 0))
+        minutes_map = out.get('minutes_by_order', {})
+        order_minutes = minutes_map.get(order_id, 0) if isinstance(minutes_map, dict) else 0
+        if not _is_non_neg_num(order_minutes):
+            order_minutes = 0
+        current_workload = out.get('workload_minutes', 0)
+        if not _is_non_neg_num(current_workload):
+            current_workload = 0
+        out['workload_minutes'] = max(0, current_workload - order_minutes)
+
     out['processed_cancellation_ids'].append(event_id)
     return out
