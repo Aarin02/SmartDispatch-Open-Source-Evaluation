@@ -13,17 +13,26 @@ def estimate_eta(order, partner, travel, now=0):
     if not isinstance(order, dict) or not isinstance(partner, dict) or not isinstance(travel, dict):
         return {'partner_id': partner.get('partner_id') if isinstance(partner, dict) else None, 'eta_minutes': None, 'eligible': False}
 
-    leg1 = travel.get((partner.get('zone'), order.get('restaurant_id')))
-    leg2 = travel.get((order.get('restaurant_id'), order.get('destination_zone')))
+    partner_id = partner.get('partner_id')
+    zone = partner.get('zone')
+    restaurant_id = order.get('restaurant_id')
+    destination_zone = order.get('destination_zone')
+
+    if not all(_is_non_empty_str(s) for s in (partner_id, zone, restaurant_id, destination_zone)):
+        return {'partner_id': partner_id, 'eta_minutes': None, 'eligible': False}
+
+    # Requirement 2 & 5: Missing travel data is None (never defaulted to 0)
+    leg1 = travel.get((zone, restaurant_id))
+    leg2 = travel.get((restaurant_id, destination_zone))
     workload = partner.get('workload_minutes', 0)
     prep = order.get('prep_minutes', 0)
 
-    if not all(_is_non_neg_num(t) for t in (now, leg1, leg2, workload, prep)):
-        return {'partner_id': partner.get('partner_id'), 'eta_minutes': None, 'eligible': False}
+    if leg1 is None or leg2 is None or not all(_is_non_neg_num(t) for t in (now, leg1, leg2, workload, prep)):
+        return {'partner_id': partner_id, 'eta_minutes': None, 'eligible': False}
 
     pickup = now + leg1 + workload
     return {
-        'partner_id': partner.get('partner_id'),
+        'partner_id': partner_id,
         'pickup_minutes': pickup,
         'eta_minutes': pickup + prep + leg2,
         'eligible': True
@@ -45,6 +54,7 @@ def assign_order(order, partners, travel, now=0):
         or not _is_non_empty_str(destination_zone)
         or not _is_non_neg_num(prep_minutes)
         or not _is_non_neg_num(now)
+        or not isinstance(travel, dict)
     ):
         return {
             'order_id': order_id,
@@ -54,14 +64,39 @@ def assign_order(order, partners, travel, now=0):
         }
 
     options = []
-    for partner in partners:
+    for partner in (partners if isinstance(partners, list) else []):
+        if not isinstance(partner, dict):
+            continue
+        # Requirement 2: Only active partners below capacity
+        if partner.get('active') is not True:
+            continue
+        capacity = partner.get('capacity', 0)
+        active_orders = partner.get('active_order_ids', [])
+        if (
+            isinstance(capacity, bool)
+            or not isinstance(capacity, int)
+            or capacity <= 0
+            or not isinstance(active_orders, list)
+            or len(active_orders) >= capacity
+        ):
+            continue
+        if not _is_non_neg_num(partner.get('workload_minutes', 0)):
+            continue
+
         estimate = estimate_eta(order, partner, travel, now)
         if estimate['eligible']:
             options.append(estimate)
 
+    # Requirement 5: Leave unassigned and explain why if no valid candidate remains
     if not options:
-        return {'order_id': order_id, 'partner_id': None, 'eta_minutes': None, 'reason': 'no eligible partner or missing time data'}
+        return {
+            'order_id': order_id,
+            'partner_id': None,
+            'eta_minutes': None,
+            'reason': 'no eligible partner or missing time data'
+        }
 
+    # Requirement 4: Lowest ETA, tie-break by partner_id in ascending lexicographic order
     chosen = min(options, key=lambda item: (item['eta_minutes'], str(item['partner_id'])))
     return {
         'order_id': order_id,
